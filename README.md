@@ -1,27 +1,27 @@
-# 🚀 Bumpify - Smarter Versioning for Your Projects
+# 🚀 Bumpify CLI
 
 [![npm version](https://img.shields.io/npm/v/bumpify-cli.svg)](https://www.npmjs.com/package/bumpify-cli)
 [![License](https://img.shields.io/npm/l/bumpify-cli.svg)](https://github.com/budiselic/bumpify-cli/blob/main/LICENSE)
 
-### 🔥 The best way to bump your version and keep `version.json` in sync!
+`bumpify-cli` bumps an npm project version, keeps `public/version.json` in sync, and creates the matching Git commit and tag.
 
-`bumpify-cli` extends `npm version patch/minor/major` with additional automation:
-- ✅ **Updates `package.json`** (like `npm version`)
-- ✅ **Creates/updates `public/version.json`** automatically
-- ✅ **Commits & tags the changes in Git**
+## Installation
 
----
-
-## 🚀 **Installation**
-Install `bumpify-cli` globally to use it in any project:
 ```sh
-npm install -g bumpify-cli
+npm install --global bumpify-cli
 ```
 
----
+Node.js 18 or newer is required.
 
-## 🔧 **Usage**
-Run `bumpify` just like `npm version`:
+## Usage
+
+Both command forms are supported:
+
+```sh
+bumpify patch
+bumpify minor
+bumpify major
+```
 
 ```sh
 bumpify version patch
@@ -29,76 +29,62 @@ bumpify version minor
 bumpify version major
 ```
 
-### **What Happens When You Run It?**
-1. The version in `package.json` is **updated**.
-2. The new version is **written to `public/version.json`**.
-3. The changes are **committed** (`git commit -m "Bump version to X.X.X"`).
-4. A **Git tag** is created (`git tag vX.X.X`).
+For example, `bumpify patch` changes `1.0.0` to `1.0.1`.
 
----
+## What it does
 
-## 🎯 **Examples**
+Before changing anything, Bumpify verifies that:
 
-### **Bump a Patch Version**
-```sh
-bumpify version patch
-```
-💡 Updates from `1.0.0` → `1.0.1`
+- the current directory contains `package.json`;
+- the Git working tree is clean;
+- Git is currently on a branch, not in detached HEAD state;
+- the branch is not behind or diverged from its locally known upstream.
 
-### **Bump a Minor Version**
-```sh
-bumpify version minor
-```
-💡 Updates from `1.0.0` → `1.1.0`
+It then:
 
-### **Bump a Major Version**
-```sh
-bumpify version major
-```
-💡 Updates from `1.0.0` → `2.0.0`
+1. updates the version in `package.json`;
+2. updates a tracked `package-lock.json` or `npm-shrinkwrap.json`, when present;
+3. writes the same version to `public/version.json`;
+4. commits the changed files with `Bump version to X.X.X`;
+5. creates the lightweight Git tag `vX.X.X` on that commit.
 
----
+The `preversion`, `version`, and `postversion` npm lifecycle scripts are intentionally skipped so they cannot leave unrelated files outside the release commit.
 
-## 📌 **Why Use Bumpify?**
+If any release step fails, Bumpify exits with a non-zero status and restores the version files and Git state it changed.
 
-| Feature                               | `npm version` | `bumpify-cli` |
-|--------------------------------------|--------------|-----------|
-| Updates `package.json`                | ✅ Yes       | ✅ Yes     |
-| Creates/updates `public/version.json` | ❌ No        | ✅ Yes     |
-| Commits the changes                   | ✅ Yes       | ✅ Yes     |
-| Creates a Git tag                     | ✅ Yes       | ✅ Yes     |
+## Git tags and graph colors
 
+A tag such as `v2.4.1` is a permanent name for one commit; it is not a branch. Git clients assign colors to graph paths, so the tag normally remains on the same blue line as the branch.
 
+If a tagged commit is later rebased, cherry-picked, or replaced by a force-push, Git creates a new commit hash while the tag still points to the original hash. The old tagged history can then appear as a pink side line. To keep the tag on the main line, do not rebase or otherwise rewrite release commits after creating their tags.
 
----
+Bumpify prevents releases from detached HEAD state and stops when the local Git data says the branch is behind its upstream. It cannot detect remote commits that have not been fetched or prevent a later history rewrite performed by another command or CI workflow. Fetch and synchronize the branch before creating a release.
 
-## 📦 **Uninstall**
-If you ever need to remove `bumpify-cli`:
-```sh
-npm uninstall -g bumpify-cli
+## Version file
+
+The generated file has this format:
+
+```json
+{
+  "version": "1.0.1"
+}
 ```
 
----
+A frontend can fetch `/version.json` to display the deployed version or detect that a newer deployment is available.
 
-## 📄 **License**
-MIT License © [Antonio Budiselić](https://github.com/budiselic)
+## Important notes
 
----
+- Bumpify creates a local commit and tag; it does not push them.
+- Run `git push && git push --tags` when you are ready to publish the release history.
+- An existing target tag, a dirty working tree, an invalid command, or a failed Git hook stops the release without leaving a partial bump.
 
-## 👥 **Contributing**
-We welcome contributions! To contribute:
-1. Fork the repo
-2. Create a new branch (`git checkout -b feature-branch`)
-3. Commit your changes (`git commit -m "Added feature XYZ"`)
-4. Push to the branch (`git push origin feature-branch`)
-5. Create a PR 🚀
+## Development
 
----
+```sh
+npm test
+npm pack --dry-run
+```
 
-## 🌟 **Support & Feedback**
-If you found `bumpify-cli` helpful, please **star this repo** ⭐ on GitHub and share your feedback!  
-For issues or feature requests, open an [issue here](https://github.com/budiselic/bumpify-cli/issues).
+## License
 
----
-
-🚀 **Happy versioning with `bumpify-cli`!** 🚀
+MIT © [Antonio Budiselić](https://github.com/budiselic)

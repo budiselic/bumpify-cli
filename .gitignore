@@ -1,7 +1,6 @@
 # Ignore node_modules (dependencies)
 node_modules/
 npm-debug.log*
-package-lock.json
 
 # Ignore build artifacts
 dist/
