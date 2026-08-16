@@ -1,14 +1,14 @@
 {
   "name": "bumpify-cli",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Custom npm version command with version.json in public folder and Git commit/tag",
   "author": "Antonio Budiselić",
   "repository": {
     "type": "git",
-    "url": "https://github.com/budiselic/bumpify-cli"
+    "url": "git+https://github.com/budiselic/bumpify-cli.git"
   },
   "bin": {
-    "bumpify": "./index.js"
+    "bumpify": "index.js"
   },
   "files": [
     "index.js"
