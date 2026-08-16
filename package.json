@@ -1,6 +1,6 @@
 {
   "name": "bumpify-cli",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Safely bump npm project versions, sync public/version.json, and create matching Git commits and tags",
   "author": "Antonio Budiselić",
   "repository": {
