@@ -1,7 +1,7 @@
 {
   "name": "bumpify-cli",
-  "version": "1.0.6",
-  "description": "Custom npm version command with version.json in public folder and Git commit/tag",
+  "version": "1.0.7",
+  "description": "Safely bump npm project versions, sync public/version.json, and create matching Git commits and tags",
   "author": "Antonio Budiselić",
   "repository": {
     "type": "git",

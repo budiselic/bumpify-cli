@@ -1,21 +1,34 @@
-# 🚀 Bumpify CLI
+# Bumpify CLI
 
 [![npm version](https://img.shields.io/npm/v/bumpify-cli.svg)](https://www.npmjs.com/package/bumpify-cli)
+[![Node.js](https://img.shields.io/node/v/bumpify-cli.svg)](https://www.npmjs.com/package/bumpify-cli)
 [![License](https://img.shields.io/npm/l/bumpify-cli.svg)](https://github.com/budiselic/bumpify-cli/blob/main/LICENSE)
 
-`bumpify-cli` bumps an npm project version, keeps `public/version.json` in sync, and creates the matching Git commit and tag.
+Safely bump an npm project version, keep `public/version.json` in sync, and create the matching Git commit and tag.
 
-## Installation
+## Why Bumpify?
+
+`npm version` updates your package version, but frontend applications often need that version at runtime too. Bumpify adds a small `public/version.json` file that can be served with the application and used to:
+
+- display the deployed version;
+- detect when a new deployment is available;
+- include the application version in diagnostics or support information.
+
+## Install
 
 ```sh
 npm install --global bumpify-cli
 ```
 
-Node.js 18 or newer is required.
+Requirements:
+
+- Node.js 18 or newer;
+- npm;
+- Git with at least one commit.
 
 ## Usage
 
-Both command forms are supported:
+Run Bumpify from the root of your project:
 
 ```sh
 bumpify patch
@@ -23,46 +36,33 @@ bumpify minor
 bumpify major
 ```
 
+The longer `npm version`-style form is also supported:
+
 ```sh
 bumpify version patch
 bumpify version minor
 bumpify version major
 ```
 
-For example, `bumpify patch` changes `1.0.0` to `1.0.1`.
+| Command | Example result |
+| --- | --- |
+| `bumpify patch` | `1.0.0` → `1.0.1` |
+| `bumpify minor` | `1.0.0` → `1.1.0` |
+| `bumpify major` | `1.0.0` → `2.0.0` |
 
-## What it does
+## Release flow
 
-Before changing anything, Bumpify verifies that:
+When you run `bumpify patch`, Bumpify:
 
-- the current directory contains `package.json`;
-- the Git working tree is clean;
-- Git is currently on a branch, not in detached HEAD state;
-- the branch is not behind or diverged from its locally known upstream.
+1. verifies that the Git working tree is clean;
+2. verifies that Git is on a branch and is not behind its known upstream;
+3. updates the version in `package.json`;
+4. updates a tracked `package-lock.json` or `npm-shrinkwrap.json`, when present;
+5. writes the same version to `public/version.json`;
+6. creates a commit such as `Bump version to 1.0.1`;
+7. creates the Git tag `v1.0.1` on that commit.
 
-It then:
-
-1. updates the version in `package.json`;
-2. updates a tracked `package-lock.json` or `npm-shrinkwrap.json`, when present;
-3. writes the same version to `public/version.json`;
-4. commits the changed files with `Bump version to X.X.X`;
-5. creates the lightweight Git tag `vX.X.X` on that commit.
-
-The `preversion`, `version`, and `postversion` npm lifecycle scripts are intentionally skipped so they cannot leave unrelated files outside the release commit.
-
-If any release step fails, Bumpify exits with a non-zero status and restores the version files and Git state it changed.
-
-## Git tags and graph colors
-
-A tag such as `v2.4.1` is a permanent name for one commit; it is not a branch. Git clients assign colors to graph paths, so the tag normally remains on the same blue line as the branch.
-
-If a tagged commit is later rebased, cherry-picked, or replaced by a force-push, Git creates a new commit hash while the tag still points to the original hash. The old tagged history can then appear as a pink side line. To keep the tag on the main line, do not rebase or otherwise rewrite release commits after creating their tags.
-
-Bumpify prevents releases from detached HEAD state and stops when the local Git data says the branch is behind its upstream. It cannot detect remote commits that have not been fetched or prevent a later history rewrite performed by another command or CI workflow. Fetch and synchronize the branch before creating a release.
-
-## Version file
-
-The generated file has this format:
+The generated file looks like this:
 
 ```json
 {
@@ -70,21 +70,45 @@ The generated file has this format:
 }
 ```
 
-A frontend can fetch `/version.json` to display the deployed version or detect that a newer deployment is available.
+## Safe by default
 
-## Important notes
+Bumpify stops before changing files when:
 
-- Bumpify creates a local commit and tag; it does not push them.
-- Run `git push && git push --tags` when you are ready to publish the release history.
-- An existing target tag, a dirty working tree, an invalid command, or a failed Git hook stops the release without leaving a partial bump.
+- `package.json` is missing;
+- the command or version type is invalid;
+- the Git working tree is not clean;
+- Git is in detached HEAD state;
+- the current branch is behind or diverged from its locally known upstream.
+
+If versioning, committing, or tagging fails, Bumpify exits with a non-zero status and restores the files and Git state it changed.
+
+## Important behavior
+
+- Bumpify creates a local commit and tag. It does not push them to a remote.
+- Push a completed release with `git push && git push --tags`.
+- Run `git fetch` before releasing if you need the latest upstream comparison.
+- npm `preversion`, `version`, and `postversion` lifecycle scripts are skipped to keep the release commit predictable.
+- `public/version.json` is force-added because it is part of the release, even if the path is ignored by Git.
+
+## Update
+
+```sh
+npm install --global bumpify-cli@latest
+```
+
+## Uninstall
+
+```sh
+npm uninstall --global bumpify-cli
+```
 
 ## Development
 
 ```sh
 npm test
-npm pack --dry-run
+npm publish --dry-run
 ```
 
 ## License
 
-MIT © [Antonio Budiselić](https://github.com/budiselic)
+[MIT](LICENSE) © [Antonio Budiselić](https://github.com/budiselic)
